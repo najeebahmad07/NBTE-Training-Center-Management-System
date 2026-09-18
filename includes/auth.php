@@ -1,8 +1,5 @@
 <?php
-/**
- * RISE - Authentication & Authorization
- * =======================================
- */
+
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -186,7 +183,7 @@ function getFlashMessage($type) {
 function generateEnrollmentNo() {
     $db = getDB();
     do {
-        $enrollment = 'RISE' . date('Y') . str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT);
+        $enrollment = 'NBTE' . date('Y') . str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT);
         $stmt = $db->prepare("SELECT COUNT(*) FROM students WHERE enrollment_no = :enrollment");
         $stmt->execute([':enrollment' => $enrollment]);
     } while ($stmt->fetchColumn() > 0);
@@ -200,7 +197,7 @@ function generateEnrollmentNo() {
 function generateRollNo() {
     $db = getDB();
     do {
-        $roll = 'R' . date('ym') . str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
+        $roll = '2' . date('ym') . str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
         $stmt = $db->prepare("SELECT COUNT(*) FROM students WHERE roll_no = :roll");
         $stmt->execute([':roll' => $roll]);
     } while ($stmt->fetchColumn() > 0);
@@ -289,7 +286,7 @@ function uploadFile($file, $destination, $allowedTypes, $maxSize, $maxWidth = nu
     // Generate unique filename
     $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
     $extension = strtolower($extension);
-    $filename = uniqid('rise_', true) . '.' . $extension;
+    $filename = uniqid('nbte_', true) . '.' . $extension;
 
     // Create directory if not exists
     if (!is_dir($destination)) {

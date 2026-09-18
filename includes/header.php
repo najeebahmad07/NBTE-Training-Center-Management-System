@@ -29,6 +29,9 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
     <!-- Custom CSS -->
     <link href="assets/css/style.css" rel="stylesheet">
 
+       <link href="assets/images/logo.jpg" rel="website icon">
+
+    link
     <style>
         /* Inline fix for dropdown in dark mode */
         [data-theme="dark"] .dropdown-menu {

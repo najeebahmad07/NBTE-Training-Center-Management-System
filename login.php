@@ -51,12 +51,26 @@ if ($flashError) $error = $flashError;
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <link href="assets/css/style.css" rel="stylesheet">
+    <style>
+      .login-logo {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.login-logo img {
+    width: 120px;
+    height: auto;
+    object-fit: contain;
+}
+    </style>
 </head>
 <body>
 
 <div class="login-wrapper">
     <div class="login-card">
-        <div class="login-logo"><?php echo APP_NAME; ?></div>
+       <div class="login-logo">
+    <img src="assets/images/logo.webp" alt="NBTE Logo">
+</div>
         <div class="login-tagline"><?php echo APP_TAGLINE; ?></div>
 
         <?php if ($error): ?>
@@ -72,7 +86,7 @@ if ($flashError) $error = $flashError;
                 <label class="form-label">Email Address</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                    <input type="email" class="form-control" name="email" placeholder="admin@rise.com"
+                    <input type="email" class="form-control" name="email" placeholder="Enter Your Email"
                            value="<?php echo sanitize($_POST['email'] ?? ''); ?>" required autofocus>
                 </div>
             </div>

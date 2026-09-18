@@ -16,14 +16,12 @@ require_once 'includes/db.php';
 
 $db         = getDB();
 $student_id = (int) ($_GET['id'] ?? $_GET['student_id'] ?? 0);
- 
+
 if ($student_id <= 0) {
     setFlashMessage('error', 'Invalid student ID.');
     header('Location: students.php');
     exit;
 }
-
-
 
 
 // ── Fetch student ─────────────────────────────────────────────────────────────
@@ -61,6 +59,8 @@ $admin_stmt = $db->prepare("SELECT * FROM admins WHERE id = :id");
 $admin_stmt->execute([':id' => $student['admin_id']]);
 $admin = $admin_stmt->fetch(PDO::FETCH_ASSOC);
 
+
+
 // ── Gates ─────────────────────────────────────────────────────────────────────
 if ($student['status'] !== 'Approved') {
     setFlashMessage('error', 'Certificate can only be generated for approved students.');
@@ -91,16 +91,36 @@ $admin_email  = trim($admin['email']);
 
 // ── Calculate marks ───────────────────────────────────────────────────────────
 $marks_stmt = $db->prepare("
-    SELECT m.marks_obtained, sub.total_marks
-    FROM marks m JOIN subjects sub ON m.subject_id = sub.id
+    SELECT
+        m.marks_obtained,
+        sub.total_marks,
+        COALESCE(sub.practical_marks,0) AS pr_max
+    FROM marks m
+    JOIN subjects sub ON m.subject_id = sub.id
     WHERE m.student_id = :student_id
 ");
-$marks_stmt->execute([':student_id' => $student_id]);
-$all_marks = $marks_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$total_obtained = array_sum(array_column($all_marks, 'marks_obtained'));
-$total_max      = array_sum(array_column($all_marks, 'total_marks'));
-$percentage     = ($total_max > 0) ? round(($total_obtained / $total_max) * 100, 2) : 0;
+$marks_stmt->execute([
+    ':student_id' => $student_id
+]);
+
+$marks = $marks_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$total_max = 0;
+$total_obtained = 0;
+
+foreach ($marks as $mark) {
+
+    $th_max = (int)$mark['total_marks'];
+    $pr_max = (int)$mark['pr_max'];
+
+    $total_max += ($th_max + $pr_max);
+    $total_obtained += (int)$mark['marks_obtained'];
+}
+
+$percentage = ($total_max > 0)
+    ? round(($total_obtained / $total_max) * 100, 2)
+    : 0;
 
 if ($percentage >= 75)     { $grade = 'A'; $grade_text = 'First Division with Distinction'; }
 elseif ($percentage >= 60) { $grade = 'B'; $grade_text = 'First Division'; }
@@ -138,7 +158,7 @@ if (!empty($student['photo'])) {
 
 $logo_path            = __DIR__ . '/assets/images/logo.jpg';
 $has_logo             = file_exists($logo_path);
-$logos_path           = __DIR__ . '/assets/images/accreditation_logos.png';
+$logos_path           = __DIR__ . '/assets/images/accreditation_logos.jpg';
 $has_logos            = file_exists($logos_path);
 $controller_sign_path = __DIR__ . '/assets/images/controller_signature.jpg';
 $has_ctrl_sign        = file_exists($controller_sign_path);
@@ -146,20 +166,20 @@ $director_sign_path   = __DIR__ . '/assets/images/director_signature.jpg';
 $has_dir_sign         = file_exists($director_sign_path);
 $fallback_sign_path   = __DIR__ . '/assets/images/authorized_signature.jpg';
 $has_fallback_sign    = file_exists($fallback_sign_path);
-$seal_path            = __DIR__ . '/assets/images/seal.png';
+$seal_path            = __DIR__ . '/assets/images/seal.jpg';
 $has_seal             = file_exists($seal_path);
 if (!$has_seal) {
     $seal_path  = __DIR__ . '/assets/images/seal.jpg';
     $has_seal   = file_exists($seal_path);
 }
 
-$verify_base_url = 'https://yourdomain.com/verify_certificate.php';
+$verify_base_url = 'https://one.reliableinclusiveskilledu.in/verify_certificate.php';
 $qr_data = $verify_base_url
          . '?cert_id='    . urlencode($certificate['certificate_id'])
          . '&enrollment=' . urlencode($student['enrollment_no']);
 
 
-         // ===================== CHECK EXISTING CERTIFICATE =====================
+// ===================== CHECK EXISTING CERTIFICATE =====================
 if (!empty($student['certificate_pdf'])) {
 
     $existing_path = __DIR__ . '/uploads/certificates/' . $student['certificate_pdf'];
@@ -253,13 +273,31 @@ $pdf->Line(6.5, 6.5 + $hdr_h, $W - 6.5, 6.5 + $hdr_h);
 $pdf->SetFont('helvetica', 'B', 7.5);
 $pdf->SetTextColor(200, 220, 240);
 $pdf->SetXY(12, 9);
-$pdf->Cell(80, 5, 'Certificate No: ' . htmlspecialchars($certificate['certificate_id']), 0, 0, 'L');
+$pdf->SetFont('helvetica', 'B', 12);
+
+$pdf->Cell(
+    80,
+    5,
+    'Certificate No: ' . htmlspecialchars($certificate['certificate_id']),
+    0,
+    0,
+    'L'
+);
 
 // ── 6. Enrollment No (TOP RIGHT CORNER) ──────────────────────────────────────
 $pdf->SetFont('helvetica', 'B', 7.5);
 $pdf->SetTextColor(200, 220, 240);
 $pdf->SetXY($W - 92, 9);
-$pdf->Cell(80, 5, 'Enrollment No: ' . htmlspecialchars($student['enrollment_no']), 0, 0, 'R');
+$pdf->SetFont('helvetica', 'B', 12);
+
+$pdf->Cell(
+    80,
+    5,
+    'Enrollment No: ' . htmlspecialchars($student['enrollment_no']),
+    0,
+    0,
+    'R'
+);
 
 // ── 7. Logo (centred in header) ───────────────────────────────────────────────
 $logo_w = 24; $logo_y = 14; $logo_x = ($W - $logo_w) / 2;
@@ -271,28 +309,36 @@ if ($has_logo) {
 }
 $text_after_logo_y = $logo_y + max($logo_h, 12);
 
-// -- Institute name (INCREASED SIZE - FULL WIDTH) -----------------------------
-$pdf->SetFont('helvetica', 'B', 14);
+// ── College heading ───────────────────────────────────────────────────────────
+$pdf->SetFont('helvetica', 'B', 24);
 $pdf->SetTextColor(220, 235, 255);
-$pdf->SetXY(6.5, $text_after_logo_y + 0.5);
-$pdf->Cell($W - 13, 7, 'RELIABLE INCLUSIVE SKILL EDUCATION', 0, 1, 'C');
 
-// -- Sub-line (FULL WIDTH) ----------------------------------------------------
-$pdf->SetFont('helvetica', '', 6.5);
-$pdf->SetTextColor(180, 210, 245);
-$pdf->SetXY(6.5, $text_after_logo_y + 8);
-$pdf->Cell($W - 13, 4, '(An Autonomous Institution Registered Under the Companies Act, 2013 / Sec 18, Incorporated Under Ministry of Corporate Affairs, Government of India)', 0, 1, 'C');
+$pdf->SetXY(6.5, $text_after_logo_y);
+$pdf->Cell($W - 13, 14, 'RELIABLE INCLUSIVE SKILL EDUCATION', 0, 1, 'C');
 
-// -- Gold separator line ------------------------------------------------------
+// -- Gold separator line (after college name) ---------------------------------
 $line_y = $text_after_logo_y + 13;
 $pdf->SetDrawColor(...$gold2);
 $pdf->SetLineWidth(0.5);
-$pdf->Line(40, $line_y, $W - 40, $line_y);
 
-// -- Certificate title (INCREASED SIZE - spaced caps) -------------------------
+
+// -- Sub-line (below college heading, above Certificate title) ----------------
+$pdf->SetFont('helvetica', '', 6.5);
+$pdf->SetTextColor(180, 210, 245);
+$pdf->SetXY(6.5, $line_y + 1);
+$pdf->Cell(
+    $W - 13,
+    4,
+    '(An Autonomous Institution Registered Under the Companies Act, 2013 / Sec 18, Incorporated Under Ministry of Corporate Affairs, Government of India)',
+    0,
+    1,
+    'C'
+);
+
+// -- Certificate title (below sub-line) ---------------------------------------
 $pdf->SetFont('helvetica', 'B', 16);
 $pdf->SetTextColor(212, 175, 55);
-$pdf->SetXY(6.5, $line_y + 2);
+$pdf->SetXY(6.5, $line_y + 6);
 $pdf->Cell($W - 13, 8, 'C E R T I F I C A T E   O F   C O M P L E T I O N', 0, 1, 'C');
 
 // ── 8. Body area background ──────────────────────────────────────────────────
@@ -334,7 +380,7 @@ $pdf->Line($nux, $nuy, $nux + $nw, $nuy);
 $pdf->SetFont('times', '', 11.5);
 $pdf->SetTextColor(...$dkGrey);
 $pdf->SetXY(0, $bt + 23);
-$pdf->Cell($W, 6, 'has successfully completed all requirements of the program', 0, 1, 'C');
+$pdf->Cell($W, 6, 'has successfully completed all requirements of the Course', 0, 1, 'C');
 
 // ── 12. Program pill (gradient look via layered rects) ───────────────────────
 $pb_w = 172; $pb_x = ($W - $pb_w) / 2; $pb_y = $bt + 30; $pb_h = 13;
@@ -353,7 +399,15 @@ $pdf->RoundedRect($pb_x, $pb_y, 4, $pb_h, 3, '1000', 'F');
 $pdf->SetFont('times', 'B', 15);
 $pdf->SetTextColor(...$white);
 $pdf->SetXY($pb_x + 4, $pb_y + 2.5);
-$pdf->Cell($pb_w - 4, 8, htmlspecialchars($student['program_name']), 0, 0, 'C');
+
+$pdf->Cell(
+    $pb_w - 4,
+    8,
+    htmlspecialchars($student['course_name'] ?? 'N/A'),
+    0,
+    0,
+    'C'
+);
 
 // ── 13. Session / Batch row ──────────────────────────────────────────────────
 $pdf->SetFont('helvetica', '', 8);
@@ -397,7 +451,7 @@ $row_h   = 8;
 $fields = [
     ["Father's Name", htmlspecialchars($student['father_name'] ?? 'N/A')],
     ['Date of Birth',  !empty($student['dob']) ? date('d M Y', strtotime($student['dob'])) : 'N/A'],
-    ['Duration',       ($student['duration'] ?? 'N/A') . ' Months'],
+    ['Duration',       ($student['duration'] ?? 'N/A') . ''],
     ['Center Name', htmlspecialchars($college_name)],
 ];
 
@@ -405,6 +459,7 @@ $fields = [
 $pdf->SetDrawColor(180, 200, 225);
 $pdf->SetLineWidth(0.3);
 $pdf->Rect($col1_x, $grid_y, $lbl_w + $val_w + 2, count($fields) * $row_h - 1, 'D');
+
 
 foreach ($fields as $i => [$label, $value]) {
     $row_y = $grid_y + $i * $row_h;
@@ -417,14 +472,14 @@ foreach ($fields as $i => [$label, $value]) {
     }
     $pdf->Rect($col1_x, $row_y, $lbl_w + $val_w + 2, $row_h - 1, 'F');
 
-    // Label
-    $pdf->SetFont('helvetica', 'B', 7.5);
+    // Label (UPDATED SIZE)
+    $pdf->SetFont('helvetica', 'B', 12);
     $pdf->SetTextColor(...$navy);
     $pdf->SetXY($col1_x + 1.5, $row_y + 1.8);
     $pdf->Cell($lbl_w - 1, 5, $label . ':', 0, 0, 'L');
 
-    // Value
-    $pdf->SetFont('helvetica', '', 7.5);
+    // Value (UPDATED SIZE)
+    $pdf->SetFont('helvetica', '', 12);
     $pdf->SetTextColor(...$dkGrey);
     $pdf->SetXY($col1_x + $lbl_w + 2, $row_y + 1.8);
     $pdf->Cell($val_w - 2, 5, $value, 0, 0, 'L');
@@ -543,7 +598,7 @@ $pdf->SetXY($s2x, $sig_lbl);
 $pdf->Cell($sl, 4, 'Director', 0, 0, 'C');
 
 // ── 18. QR Code ─────────────────────────────────────────────────────────────
-$qr_s = 26;
+$qr_s = 16;
 $qr_x = $W - $m - $qr_s - 1;
 $qr_y = $sep_y + 3;
 
@@ -572,12 +627,11 @@ $pdf->SetTextColor(75, 90, 110);
 $pdf->SetXY($qr_x - 1.5, $qr_y + $qr_s + 2.5);
 $pdf->Cell($qr_s + 3, 3.5, 'Scan to Verify', 0, 1, 'C');
 $pdf->SetX($qr_x - 1.5);
- 
 
 // ── 19. Accreditation logos / text ──────────────────────────────────────────
 if ($has_logos) {
-    $lg_w = 90; $lg_h = 9;
-    $pdf->Image($logos_path, ($W - $lg_w) / 2, $H - 12, $lg_w, $lg_h, '', '', '', true, 150);
+    $lg_w = 80; $lg_h = 8;
+    $pdf->Image($logos_path, ($W - $lg_w) / 2, $H - 10, $lg_w, $lg_h, '', '', '', true, 300);
 } else {
     $pdf->SetFont('helvetica', '', 5);
     $pdf->SetTextColor(140, 155, 175);

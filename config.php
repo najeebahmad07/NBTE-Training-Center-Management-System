@@ -17,25 +17,40 @@ ini_set('session.cookie_samesite', 'Strict');
 ini_set('session.gc_maxlifetime', 3600);
 
 // Application Constants
-define('APP_NAME', 'RISE');
-define('APP_TAGLINE', 'Reliable Inclusive Skill Education');
-define('APP_URL', 'http://localhost/rise2');
+define('APP_NAME', 'NBTE');
+define('APP_TAGLINE', 'National Board for Technical Education');
+define('APP_URL', 'http://localhost/nbteapp/');
 define('APP_VERSION', '1.0.0');
 
 // Database Configuration
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'rise_saas_new');
+define('DB_NAME', 'nbte');
 define('DB_USER', 'root');
 define('DB_PASS', '');
 define('DB_CHARSET', 'utf8mb4');
 
 // Razorpay Configuration
-define('RAZORPAY_KEY_ID', 'rzp_test_SWB4euUEGwS1WS');
-define('RAZORPAY_KEY_SECRET', 'bsbdc8yVbCbY9vijmkNqd1wB');
+define('RAZORPAY_KEY_ID', 'rzp_test_TQWuPysRxCUw5Q');
+define('RAZORPAY_KEY_SECRET', 'a2hHQaCGmM3he2WhnuYnlZDn');
 
 // Wallet Configuration
-define('MIN_RECHARGE_AMOUNT', 1);
+// Wallet Configuration
+define('MIN_RECHARGE_AMOUNT', 100);
+
+// Default Approval Fee
 define('APPROVAL_FEE', 2000);
+
+// Special Program Fees
+$PROGRAM_APPROVAL_FEES = [
+
+    // 20 => 200,
+    22 => 200,
+    25 => 200,
+    26 => 200,
+    29 => 200,
+
+];
+
 define('CURRENCY', 'INR');
 define('CURRENCY_SYMBOL', '₹');
 

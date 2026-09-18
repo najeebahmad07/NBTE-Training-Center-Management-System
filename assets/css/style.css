@@ -3,9 +3,9 @@
    ============================================ */
 
 :root {
-    --primary: #4e73df;
+    --primary: #D49729;
     --primary-dark: #3a5bc7;
-    --secondary: #858796;
+    --secondary:  #062A5A;
     --success: #1cc88a;
     --info: #36b9cc;
     --warning: #f6c23e;
@@ -610,7 +610,12 @@ a:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-image: url('/nbteapp/assets/images/login-background.jpg');
+
+
+background-size: cover;
+background-position: center;
+background-repeat: no-repeat;
     padding: 20px;
 }
 

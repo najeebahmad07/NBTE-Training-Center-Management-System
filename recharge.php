@@ -1,7 +1,7 @@
 <?php
 /**
- * RISE - Wallet Recharge (Razorpay Orders API)
- * =============================================
+ * RISE - Recharge Wallet
+ * Full Version: Supports UPI, GPay, PhonePe, Cards, Net Banking, Wallets
  */
 
 $pageTitle = 'Recharge Wallet';
@@ -16,84 +16,89 @@ if (isSuperAdmin()) {
 }
 
 $currentUser = getCurrentUser();
-$balance     = $currentUser['wallet_balance'];
 ?>
 
 <div class="row justify-content-center">
     <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h6 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Recharge Wallet</h6>
+        <div class="card shadow-lg border-0 rounded-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-wallet me-2"></i>Recharge Wallet
+                </h5>
             </div>
-            <div class="card-body">
-                <div class="text-center mb-4">
-                    <p class="text-muted">Current Balance</p>
-                    <h2 class="text-primary"><?php echo CURRENCY_SYMBOL . number_format($balance, 2); ?></h2>
+
+            <div class="card-body p-4">
+
+                <!-- Amount Input -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold">
+                        Enter Recharge Amount (₹)
+                    </label>
+
+                    <input type="number"
+                           class="form-control form-control-lg text-center"
+                           id="rechargeAmount"
+                           min="100"
+                           step="1"
+                           placeholder="Enter amount above ₹100"
+                           required>
+
+                    <small class="text-muted">
+                        Minimum Recharge: ₹100
+                    </small>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Amount (<?php echo CURRENCY_SYMBOL; ?>) <span class="text-danger">*</span></label>
-                    <input type="number" class="form-control form-control-lg text-center" id="rechargeAmount"
-                           min="<?php echo MIN_RECHARGE_AMOUNT; ?>" step="1" required
-                           placeholder="Min <?php echo CURRENCY_SYMBOL . MIN_RECHARGE_AMOUNT; ?>">
-                    <small class="text-muted">Minimum: <?php echo CURRENCY_SYMBOL . number_format(MIN_RECHARGE_AMOUNT); ?></small>
+                <!-- Quick Buttons -->
+                <div class="d-flex flex-wrap gap-2 justify-content-center mb-4">
+                    <button type="button" class="btn btn-outline-primary quick-amount" data-amount="100">₹100</button>
+                    <button type="button" class="btn btn-outline-primary quick-amount" data-amount="500">₹500</button>
+                    <button type="button" class="btn btn-outline-primary quick-amount" data-amount="1000">₹1000</button>
+                    <button type="button" class="btn btn-outline-primary quick-amount" data-amount="2000">₹2000</button>
+                    <button type="button" class="btn btn-outline-primary quick-amount" data-amount="5000">₹5000</button>
                 </div>
 
-                <!-- Quick amount buttons -->
-                <div class="d-flex flex-wrap gap-2 mb-4 justify-content-center">
-                    <button type="button" class="btn btn-outline-primary quick-amount" data-amount="500"><?php echo CURRENCY_SYMBOL; ?>500</button>
-                    <button type="button" class="btn btn-outline-primary quick-amount" data-amount="1000"><?php echo CURRENCY_SYMBOL; ?>1,000</button>
-                    <button type="button" class="btn btn-outline-primary quick-amount" data-amount="2000"><?php echo CURRENCY_SYMBOL; ?>2,000</button>
-                    <button type="button" class="btn btn-outline-primary quick-amount" data-amount="5000"><?php echo CURRENCY_SYMBOL; ?>5,000</button>
-                </div>
-
-                <button type="button" id="payNowBtn" class="btn btn-primary btn-lg w-100">
-                    <i class="fas fa-bolt me-2"></i>Pay with Razorpay
+                <!-- Pay Button -->
+                <button type="button" id="payNowBtn" class="btn btn-success btn-lg w-100">
+                    <i class="fas fa-bolt me-2"></i>Pay Now
                 </button>
 
-                <!-- Payment Features -->
-                <div class="mt-4">
-                    <div class="border rounded p-3 bg-light">
-                        <div class="text-center mb-3">
-                            <strong class="text-success">
-                                <i class="fas fa-shield-alt me-1"></i> Secure Payment
-                            </strong>
+                <!-- Payment Methods Display -->
+                <div class="mt-4 border rounded p-3 bg-light text-center">
+                    <h6 class="fw-bold text-success mb-3">
+                        <i class="fas fa-shield-alt me-1"></i>Accepted Payment Methods
+                    </h6>
+
+                    <div class="row text-center">
+                        <div class="col-4 mb-3">
+                            <i class="fas fa-mobile-alt fs-3"></i>
+                            <p class="small mb-0">UPI</p>
                         </div>
-                        <div class="row text-center">
-                            <div class="col-4">
-                                <i class="fas fa-lock text-primary fs-4"></i>
-                                <p class="small mt-1 mb-0">256-bit SSL</p>
-                            </div>
-                            <div class="col-4">
-                                <i class="fas fa-credit-card text-primary fs-4"></i>
-                                <p class="small mt-1 mb-0">All Cards</p>
-                            </div>
-                            <div class="col-4">
-                                <i class="fas fa-mobile-alt text-primary fs-4"></i>
-                                <p class="small mt-1 mb-0">UPI / Wallet</p>
-                            </div>
+                        <div class="col-4 mb-3">
+                            <i class="fab fa-google-pay fs-3"></i>
+                            <p class="small mb-0">Google Pay</p>
                         </div>
-                        <hr>
-                        <div class="row text-center">
-                            <div class="col-4">
-                                <i class="fas fa-bolt text-success fs-4"></i>
-                                <p class="small mt-1 mb-0">Instant Credit</p>
-                            </div>
-                            <div class="col-4">
-                                <i class="fas fa-check-circle text-success fs-4"></i>
-                                <p class="small mt-1 mb-0">100% Secure</p>
-                            </div>
-                            <div class="col-4">
-                                <i class="fas fa-headset text-success fs-4"></i>
-                                <p class="small mt-1 mb-0">24x7 Support</p>
-                            </div>
+                        <div class="col-4 mb-3">
+                            <i class="fas fa-mobile fs-3"></i>
+                            <p class="small mb-0">PhonePe</p>
                         </div>
-                        <div class="text-center mt-3">
-                            <small class="text-muted">
-                                Powered by <strong>Razorpay Secure Payment Gateway</strong>
-                            </small>
+
+                        <div class="col-4 mb-3">
+                            <i class="fas fa-university fs-3"></i>
+                            <p class="small mb-0">Net Banking</p>
+                        </div>
+                        <div class="col-4 mb-3">
+                            <i class="fas fa-credit-card fs-3"></i>
+                            <p class="small mb-0">Debit/Credit Card</p>
+                        </div>
+                        <div class="col-4 mb-3">
+                            <i class="fas fa-wallet fs-3"></i>
+                            <p class="small mb-0">Wallets</p>
                         </div>
                     </div>
+
+                    <small class="text-muted">
+                        Powered by Razorpay Secure Gateway
+                    </small>
                 </div>
 
             </div>
@@ -101,31 +106,34 @@ $balance     = $currentUser['wallet_balance'];
     </div>
 </div>
 
-<!-- Razorpay Script -->
+<!-- Razorpay Checkout -->
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
     // Quick amount buttons
-    document.querySelectorAll('.quick-amount').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            document.getElementById('rechargeAmount').value = this.getAttribute('data-amount');
+    document.querySelectorAll('.quick-amount').forEach(function(btn){
+        btn.addEventListener('click', function(){
+            document.getElementById('rechargeAmount').value = this.dataset.amount;
         });
     });
 
+    // Pay button click
     document.getElementById('payNowBtn').addEventListener('click', function () {
+
         const amount = parseInt(document.getElementById('rechargeAmount').value);
 
-        if (!amount || amount < <?php echo MIN_RECHARGE_AMOUNT; ?>) {
-            alert('Minimum recharge amount is <?php echo CURRENCY_SYMBOL . MIN_RECHARGE_AMOUNT; ?>');
+        if (!amount || amount < 100) {
+            alert('Minimum recharge amount is ₹100');
             return;
         }
 
-        const btn = document.getElementById('payNowBtn');
+        const btn = this;
         btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating order...';
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating Order...';
 
-        // Step 1: Create Razorpay Order
+        // Create Order
         const formData = new FormData();
         formData.append('amount', amount);
         formData.append('csrf_token', '<?php echo generateCSRFToken(); ?>');
@@ -136,29 +144,30 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .then(res => res.json())
         .then(orderData => {
+
             if (!orderData.success) {
-                alert('Failed to initiate payment: ' + orderData.message);
+                alert(orderData.message);
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-bolt me-2"></i>Pay with Razorpay';
+                btn.innerHTML = '<i class="fas fa-bolt me-2"></i>Pay Now';
                 return;
             }
 
-            // Step 2: Open Razorpay with Order ID
-            const options = {
+            var options = {
                 key: '<?php echo RAZORPAY_KEY_ID; ?>',
-                amount: orderData.amount,       // in paise from server
-                currency: orderData.currency,
-                order_id: orderData.order_id,   // IMPORTANT: order_id enables auto-capture
-                name: '<?php echo APP_NAME; ?>',
-                description: 'Wallet Recharge',
+                amount: orderData.amount,
+                currency: "INR",
+                name: "<?php echo APP_NAME; ?>",
+                description: "Wallet Recharge",
+                order_id: orderData.order_id,
+
                 handler: function (response) {
+
                     btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
 
-                    // Step 3: Verify payment + credit wallet
                     const verifyData = new FormData();
                     verifyData.append('razorpay_payment_id', response.razorpay_payment_id);
-                    verifyData.append('razorpay_order_id',   response.razorpay_order_id);
-                    verifyData.append('razorpay_signature',  response.razorpay_signature);
+                    verifyData.append('razorpay_order_id', response.razorpay_order_id);
+                    verifyData.append('razorpay_signature', response.razorpay_signature);
                     verifyData.append('amount', amount);
                     verifyData.append('csrf_token', '<?php echo generateCSRFToken(); ?>');
 
@@ -169,42 +178,41 @@ document.addEventListener('DOMContentLoaded', function () {
                     .then(res => res.json())
                     .then(data => {
                         if (data.success) {
-                            alert('✅ Recharge successful! ₹' + amount + ' added to wallet.');
+                            alert('✅ Recharge successful! ₹' + amount + ' added.');
                             window.location.href = 'wallet.php';
                         } else {
                             alert('❌ ' + data.message);
                             btn.disabled = false;
-                            btn.innerHTML = '<i class="fas fa-bolt me-2"></i>Pay with Razorpay';
+                            btn.innerHTML = '<i class="fas fa-bolt me-2"></i>Pay Now';
                         }
-                    })
-                    .catch(err => {
-                        alert('Error processing payment. Please contact support.');
-                        console.error(err);
-                        btn.disabled = false;
-                        btn.innerHTML = '<i class="fas fa-bolt me-2"></i>Pay with Razorpay';
                     });
                 },
+
                 prefill: {
-                    name:  '<?php echo addslashes($currentUser['name']); ?>',
-                    email: '<?php echo addslashes($currentUser['email']); ?>'
+                    name: "<?php echo addslashes($currentUser['name']); ?>",
+                    email: "<?php echo addslashes($currentUser['email']); ?>"
                 },
-                theme: { color: '#4e73df' },
+
+                theme: {
+                    color: "#198754"
+                },
+
                 modal: {
                     ondismiss: function () {
                         btn.disabled = false;
-                        btn.innerHTML = '<i class="fas fa-bolt me-2"></i>Pay with Razorpay';
+                        btn.innerHTML = '<i class="fas fa-bolt me-2"></i>Pay Now';
                     }
                 }
             };
 
-            const rzp = new Razorpay(options);
+            var rzp = new Razorpay(options);
             rzp.open();
         })
         .catch(err => {
-            alert('Error creating order. Please try again.');
+            alert('Error creating payment order.');
             console.error(err);
             btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-bolt me-2"></i>Pay with Razorpay';
+            btn.innerHTML = '<i class="fas fa-bolt me-2"></i>Pay Now';
         });
     });
 });

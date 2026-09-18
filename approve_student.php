@@ -45,7 +45,10 @@ if ($student['status'] === 'Approved') {
 
 // Check wallet balance
 $balance = getWalletBalance($userId);
-$fee     = APPROVAL_FEE;
+// Program-wise approval fee
+$program_id = (int)$student['program_id'];
+
+$fee = $PROGRAM_APPROVAL_FEES[$program_id] ?? APPROVAL_FEE;
 
 if ($balance < $fee) {
     setFlashMessage('error',

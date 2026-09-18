@@ -23,16 +23,28 @@ if (isSuperAdmin() && $_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($notifId > 0 && $studentId > 0 && in_array($action, ['approve', 'reject'])) {
         $db->beginTransaction();
         try {
-            $certStatus = ($action === 'approve') ? 'Approved' : 'Rejected';
+          $certStatus = ($action === 'approve') ? 'Approved' : 'Rejected';
 
-            // Update student certificate_approved
-            $stmt = $db->prepare("UPDATE students SET certificate_approved = :status WHERE id = :id");
-            $stmt->execute([':status' => $certStatus, ':id' => $studentId]);
+/* Update student certificate + marksheet approval */
+$stmt = $db->prepare("
+    UPDATE students
+    SET certificate_approved = ?,
+        marksheet_approved = ?
+    WHERE id = ?
+");
+$stmt->execute([
+    $certStatus,
+    $certStatus,
+    $studentId
+]);
 
-            // Mark this notification as read
-            $stmt = $db->prepare("UPDATE notifications SET is_read = 1 WHERE id = :id");
-            $stmt->execute([':id' => $notifId]);
-
+/* Mark notification as read */
+$stmt = $db->prepare("
+    UPDATE notifications
+    SET is_read = 1
+    WHERE id = ?
+");
+$stmt->execute([$notifId]);
             // Fetch student info to notify admin back
             $stmt = $db->prepare("SELECT full_name, enrollment_no, admin_id FROM students WHERE id = :id");
             $stmt->execute([':id' => $studentId]);
@@ -61,10 +73,9 @@ if (isSuperAdmin() && $_SERVER['REQUEST_METHOD'] === 'POST') {
             setFlashMessage('success', 'Certificate ' . $certStatus . ' successfully.');
 
         } catch (Exception $e) {
-            $db->rollBack();
-            error_log("Certificate approval error: " . $e->getMessage());
-            setFlashMessage('error', 'Action failed. Please try again.');
-        }
+    $db->rollBack();
+    die("ERROR: " . $e->getMessage());
+}
     }
 
     header('Location: notifications.php');

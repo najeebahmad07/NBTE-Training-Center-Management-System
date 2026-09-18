@@ -58,12 +58,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $courseId = (int) ($_POST['course_id'] ?? 0);
     $sessionName = sanitize($_POST['session_name'] ?? '');
     $batch = sanitize($_POST['batch'] ?? '');
+
+    // Educational — all optional now
     $tenthBoard = sanitize($_POST['tenth_board_name'] ?? '');
-    $tenthYear = (int) ($_POST['tenth_passing_year'] ?? 0);
-    $tenthPct = (float) ($_POST['tenth_percentage'] ?? 0);
+    $tenthYear = !empty($_POST['tenth_passing_year']) ? (int) $_POST['tenth_passing_year'] : null;
+    $tenthPct = !empty($_POST['tenth_percentage']) ? (float) $_POST['tenth_percentage'] : null;
     $twelfthBoard = sanitize($_POST['twelfth_board_name'] ?? '');
-    $twelfthYear = (int) ($_POST['twelfth_passing_year'] ?? 0);
-    $twelfthPct = (float) ($_POST['twelfth_percentage'] ?? 0);
+    $twelfthYear = !empty($_POST['twelfth_passing_year']) ? (int) $_POST['twelfth_passing_year'] : null;
+    $twelfthPct = !empty($_POST['twelfth_percentage']) ? (float) $_POST['twelfth_percentage'] : null;
     $ugUniversity = sanitize($_POST['ug_university_name'] ?? '');
     $ugYear = !empty($_POST['ug_passing_year']) ? (int) $_POST['ug_passing_year'] : null;
     $ugPct = !empty($_POST['ug_percentage']) ? (float) $_POST['ug_percentage'] : null;
@@ -144,9 +146,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':father_name' => $fatherName, ':mother_name' => $motherName,
             ':mobile' => $mobile, ':email' => $email ?: null, ':address' => $address,
             ':aadhaar_number' => $aadhaarNumber, ':aadhaar_upload' => $aadhaarFilename,
-            ':tenth_board' => $tenthBoard, ':tenth_year' => $tenthYear, ':tenth_pct' => $tenthPct,
+            ':tenth_board' => $tenthBoard ?: null, ':tenth_year' => $tenthYear, ':tenth_pct' => $tenthPct,
             ':tenth_marksheet' => $tenthMarksheet,
-            ':twelfth_board' => $twelfthBoard, ':twelfth_year' => $twelfthYear, ':twelfth_pct' => $twelfthPct,
+            ':twelfth_board' => $twelfthBoard ?: null, ':twelfth_year' => $twelfthYear, ':twelfth_pct' => $twelfthPct,
             ':twelfth_marksheet' => $twelfthMarksheet,
             ':ug_uni' => $ugUniversity ?: null, ':ug_year' => $ugYear, ':ug_pct' => $ugPct,
             ':pg_uni' => $pgUniversity ?: null, ':pg_year' => $pgYear, ':pg_pct' => $pgPct,
@@ -154,8 +156,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':id' => $studentId, ':admin_id' => getCurrentUserId(),
         ]);
 
-       echo "<script>alert('Student updated successfully.');window.location='view_student.php?id=$studentId';</script>";
-exit;
+        echo "<script>alert('Student updated successfully.');window.location='view_student.php?id=$studentId';</script>";
+        exit;
     }
 }
 
@@ -271,46 +273,50 @@ $s = $_SERVER['REQUEST_METHOD'] === 'POST' ? array_merge($student, $_POST) : $st
         </div>
     </div>
 
+    <!-- ✅ Educational Qualification — ALL OPTIONAL -->
     <div class="card mb-4">
         <div class="card-body">
-            <div class="form-section-title"><i class="fas fa-book-open"></i> Educational Qualification</div>
+            <div class="form-section-title"><i class="fas fa-book-open"></i> Educational Qualification <small class="text-muted fw-normal">(Optional)</small></div>
+
             <h6 class="text-muted mb-3">10th Standard</h6>
             <div class="row g-3 mb-4">
                 <div class="col-md-4">
-                    <label class="form-label">Board <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="tenth_board_name" required value="<?php echo sanitize($s['tenth_board_name']); ?>">
+                    <label class="form-label">Board</label>
+                    <input type="text" class="form-control" name="tenth_board_name" value="<?php echo sanitize($s['tenth_board_name'] ?? ''); ?>">
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label">Year <span class="text-danger">*</span></label>
-                    <input type="number" class="form-control" name="tenth_passing_year" required value="<?php echo sanitize($s['tenth_passing_year']); ?>">
+                    <label class="form-label">Year</label>
+                    <input type="number" class="form-control" name="tenth_passing_year" value="<?php echo sanitize($s['tenth_passing_year'] ?? ''); ?>">
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label">% <span class="text-danger">*</span></label>
-                    <input type="number" class="form-control" name="tenth_percentage" required step="0.01" value="<?php echo sanitize($s['tenth_percentage']); ?>">
+                    <label class="form-label">%</label>
+                    <input type="number" class="form-control" name="tenth_percentage" step="0.01" value="<?php echo sanitize($s['tenth_percentage'] ?? ''); ?>">
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Marksheet</label>
                     <input type="file" class="form-control" name="tenth_marksheet_upload" accept=".jpg,.jpeg,.png,.pdf">
+                    <small class="text-muted">Leave empty to keep current file</small>
                 </div>
             </div>
 
             <h6 class="text-muted mb-3">12th Standard</h6>
             <div class="row g-3 mb-4">
                 <div class="col-md-4">
-                    <label class="form-label">Board <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="twelfth_board_name" required value="<?php echo sanitize($s['twelfth_board_name']); ?>">
+                    <label class="form-label">Board</label>
+                    <input type="text" class="form-control" name="twelfth_board_name" value="<?php echo sanitize($s['twelfth_board_name'] ?? ''); ?>">
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label">Year <span class="text-danger">*</span></label>
-                    <input type="number" class="form-control" name="twelfth_passing_year" required value="<?php echo sanitize($s['twelfth_passing_year']); ?>">
+                    <label class="form-label">Year</label>
+                    <input type="number" class="form-control" name="twelfth_passing_year" value="<?php echo sanitize($s['twelfth_passing_year'] ?? ''); ?>">
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label">% <span class="text-danger">*</span></label>
-                    <input type="number" class="form-control" name="twelfth_percentage" required step="0.01" value="<?php echo sanitize($s['twelfth_percentage']); ?>">
+                    <label class="form-label">%</label>
+                    <input type="number" class="form-control" name="twelfth_percentage" step="0.01" value="<?php echo sanitize($s['twelfth_percentage'] ?? ''); ?>">
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Marksheet</label>
                     <input type="file" class="form-control" name="twelfth_marksheet_upload" accept=".jpg,.jpeg,.png,.pdf">
+                    <small class="text-muted">Leave empty to keep current file</small>
                 </div>
             </div>
 

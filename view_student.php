@@ -118,13 +118,12 @@ $certApproved = $s['certificate_approved'] ?? 'Pending';
                             <i class="fas fa-id-card me-1"></i>ID Card
                         </a>
 
-                        <?php if (!empty($marks)): ?>
+                        <?php if (!empty($marks) && $s['marksheet_approved'] === 'Approved'): ?>
 
-                        <!-- Marksheet — always available once approved + marks exist -->
-                        <a href="generate_marksheet.php?id=<?php echo $s['id']; ?>"
-                           class="btn btn-sm btn-info" target="_blank">
-                            <i class="fas fa-file-alt me-1"></i>Marksheet
-                        </a>
+<a href="generate_marksheet.php?id=<?php echo $s['id']; ?>"
+   class="btn btn-sm btn-info" target="_blank">
+    <i class="fas fa-file-alt me-1"></i>Marksheet
+</a>
 
                         <!-- Certificate — only if Super Admin approved -->
                         <?php if ($certApproved === 'Approved'): ?>
@@ -144,6 +143,377 @@ $certApproved = $s['certificate_approved'] ?? 'Pending';
                         <?php endif; ?>
 
                         <?php endif; // marks exist ?>
+
+<button type="button"
+        class="btn btn-sm btn-dark"
+        onclick="openAttendanceModal(
+            <?php echo (int)$s['id']; ?>
+        )">
+    <i class="fas fa-calendar-check me-1"></i>Attendance
+</button>
+
+<!-- =========================================================
+     ATTENDANCE SHEET MODAL
+========================================================= -->
+
+<div class="modal fade"
+     id="attendanceModal"
+     tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+                    <i class="fas fa-calendar-check me-2"></i>
+                    Attendance Sheet
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+
+            <div class="modal-body">
+
+                <div id="attendanceSheetContent">
+
+                    <div class="text-center py-5">
+
+                        <div class="spinner-border text-secondary">
+                        </div>
+
+                        <p class="mt-3 mb-0">
+                            Loading attendance sheet...
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="modal-footer">
+
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+
+                    <i class="fas fa-times me-1"></i>
+                    Close
+
+                </button>
+
+
+                <button type="button"
+                        class="btn btn-dark"
+                        onclick="printAttendanceSheet()">
+
+                    <i class="fas fa-print me-1"></i>
+                    Print
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+function openAttendanceModal(studentId)
+{
+    const modalElement =
+        document.getElementById('attendanceModal');
+
+    const modal =
+        new bootstrap.Modal(modalElement);
+
+    const content =
+        document.getElementById('attendanceSheetContent');
+
+
+    content.innerHTML = `
+        <div class="text-center py-5">
+
+            <div class="spinner-border text-secondary">
+            </div>
+
+            <p class="mt-3">
+                Loading attendance sheet...
+            </p>
+
+        </div>
+    `;
+
+
+    modal.show();
+
+
+    fetch(
+        'attendance_sheet.php?id=' +
+        encodeURIComponent(studentId)
+    )
+
+    .then(response => {
+
+        if (!response.ok) {
+            throw new Error(
+                'Unable to load attendance sheet.'
+            );
+        }
+
+        return response.text();
+
+    })
+
+    .then(html => {
+
+        content.innerHTML = html;
+
+    })
+
+    .catch(error => {
+
+        content.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                ${error.message}
+            </div>
+        `;
+
+    });
+}
+
+
+function printAttendanceSheet()
+{
+    const content =
+        document.getElementById(
+            'attendanceSheetContent'
+        ).innerHTML;
+
+
+    const printWindow =
+        window.open(
+            '',
+            '_blank',
+            'width=1200,height=800'
+        );
+
+
+    printWindow.document.write(`
+
+        <!DOCTYPE html>
+
+        <html>
+
+        <head>
+
+            <title>Attendance Sheet</title>
+
+            <style>
+
+                @page {
+                    size: A4 landscape;
+                    margin: 10mm;
+                }
+
+
+                * {
+                    box-sizing: border-box;
+                }
+
+
+                body {
+
+                    margin: 0;
+
+                    padding: 20px;
+
+                    font-family:
+                        Arial,
+                        Helvetica,
+                        sans-serif;
+
+                    background: #fff;
+
+                    color: #000;
+
+                }
+
+
+                .attendance-print-title {
+
+                    text-align: center;
+
+                    font-size: 22px;
+
+                    font-weight: 700;
+
+                    margin-bottom: 15px;
+
+                }
+
+
+                .attendance-table {
+
+                    width: 100%;
+
+                    border-collapse: collapse;
+
+                    table-layout: fixed;
+
+                }
+
+
+                .attendance-table th,
+                .attendance-table td {
+
+                    border: 2px solid #777;
+
+                    padding: 7px;
+
+                    text-align: center;
+
+                    vertical-align: middle;
+
+                }
+
+
+                .attendance-table th {
+
+                    background: #fff;
+
+                    font-size: 14px;
+
+                    font-weight: 700;
+
+                }
+
+
+                .attendance-table td {
+
+                    height: 70px;
+
+                    font-size: 13px;
+
+                }
+
+
+                .attendance-table .student-column {
+
+                    width: 240px;
+
+                    text-align: left;
+
+                }
+
+
+                .attendance-table .photo-column {
+
+                    width: 80px;
+
+                }
+
+
+                .attendance-table .sno-column {
+
+                    width: 55px;
+
+                }
+
+
+                .student-photo {
+
+                    width: 60px;
+
+                    height: 65px;
+
+                    object-fit: cover;
+
+                    border: 1px solid #777;
+
+                }
+
+
+                .student-name {
+
+                    font-weight: 600;
+
+                    font-size: 14px;
+
+                }
+
+
+                .enrollment {
+
+                    font-size: 13px;
+
+                    margin-top: 3px;
+
+                }
+
+
+                .paper-column {
+
+                    min-width: 75px;
+
+                }
+
+
+                .print-footer {
+
+                    margin-top: 15px;
+
+                    font-size: 11px;
+
+                    text-align: right;
+
+                }
+
+
+            </style>
+
+        </head>
+
+
+        <body>
+
+            ${content}
+
+        </body>
+
+        </html>
+
+    `);
+
+
+    printWindow.document.close();
+
+
+    printWindow.focus();
+
+
+    setTimeout(function() {
+
+        printWindow.print();
+
+    }, 500);
+
+}
+
+</script>
 
                         <?php else: ?>
                         <!-- Not yet approved by admin -->
@@ -169,8 +539,8 @@ $certApproved = $s['certificate_approved'] ?? 'Pending';
     <div class="alert alert-info d-flex align-items-center gap-2 mb-4">
         <i class="fas fa-info-circle fa-lg"></i>
         <div>
-            <strong>Certificate Approval Pending</strong> — A request has been sent to the Super Admin.
-            The certificate button will be unlocked once approved.
+            <strong>Marksheet & Certificate Approval Pending</strong> — A request has been sent to the Super Admin.
+            The Marksheet & Certificate button will be unlocked once approved.
         </div>
     </div>
     <?php elseif ($certApproved === 'Rejected'): ?>
@@ -240,47 +610,465 @@ $certApproved = $s['certificate_approved'] ?? 'Pending';
             </div>
         </div>
     </div>
+ <!-- Education -->
+<div class="col-md-6">
+    <div class="card h-100 border-0 shadow-sm">
 
-    <!-- Education -->
-    <div class="col-md-6">
-        <div class="card h-100">
-            <div class="card-header"><h6 class="mb-0"><i class="fas fa-book-open me-2"></i>Educational Details</h6></div>
-            <div class="card-body">
-                <h6 class="text-primary mb-2">10th Standard</h6>
-                <div class="row g-2 mb-3">
-                    <div class="col-6"><div class="detail-label">Board</div><div class="detail-value"><?php echo sanitize($s['tenth_board_name']); ?></div></div>
-                    <div class="col-3"><div class="detail-label">Year</div><div class="detail-value"><?php echo $s['tenth_passing_year']; ?></div></div>
-                    <div class="col-3"><div class="detail-label">%</div><div class="detail-value"><?php echo $s['tenth_percentage']; ?>%</div></div>
+        <div class="card-header bg-white border-bottom py-3">
+            <h6 class="mb-0 fw-semibold">
+                <i class="fas fa-graduation-cap text-primary me-2"></i>
+                Educational Details
+            </h6>
+        </div>
+
+        <div class="card-body">
+
+            <!-- ================= 10TH ================= -->
+            <div class="education-card mb-3">
+
+                <div class="education-title">
+                    <div>
+                        <span class="education-icon">
+                            <i class="fas fa-school"></i>
+                        </span>
+
+                        <span>10th Standard</span>
+                    </div>
+
+                    <?php if (!empty($s['tenth_percentage'])): ?>
+                        <span class="percentage-badge">
+                            <?php echo $s['tenth_percentage']; ?>%
+                        </span>
+                    <?php endif; ?>
                 </div>
 
-                <h6 class="text-primary mb-2">12th Standard</h6>
-                <div class="row g-2 mb-3">
-                    <div class="col-6"><div class="detail-label">Board</div><div class="detail-value"><?php echo sanitize($s['twelfth_board_name']); ?></div></div>
-                    <div class="col-3"><div class="detail-label">Year</div><div class="detail-value"><?php echo $s['twelfth_passing_year']; ?></div></div>
-                    <div class="col-3"><div class="detail-label">%</div><div class="detail-value"><?php echo $s['twelfth_percentage']; ?>%</div></div>
-                </div>
+                <div class="education-details">
 
-                <?php if ($s['ug_university_name']): ?>
-                <h6 class="text-primary mb-2">UG</h6>
-                <div class="row g-2 mb-3">
-                    <div class="col-6"><div class="detail-value"><?php echo sanitize($s['ug_university_name']); ?></div></div>
-                    <div class="col-3"><div class="detail-value"><?php echo $s['ug_passing_year']; ?></div></div>
-                    <div class="col-3"><div class="detail-value"><?php echo $s['ug_percentage']; ?>%</div></div>
-                </div>
-                <?php endif; ?>
+                    <div class="education-detail">
+                        <span>Institute / School</span>
+                        <strong>
+                            <?php echo !empty($s['tenth_institute_name'])
+                                ? sanitize($s['tenth_institute_name'])
+                                : '-'; ?>
+                        </strong>
+                    </div>
 
-                <?php if ($s['pg_university_name']): ?>
-                <h6 class="text-primary mb-2">PG</h6>
-                <div class="row g-2">
-                    <div class="col-6"><div class="detail-value"><?php echo sanitize($s['pg_university_name']); ?></div></div>
-                    <div class="col-3"><div class="detail-value"><?php echo $s['pg_passing_year']; ?></div></div>
-                    <div class="col-3"><div class="detail-value"><?php echo $s['pg_percentage']; ?>%</div></div>
+                    <div class="education-detail">
+                        <span>Board</span>
+                        <strong>
+                            <?php echo !empty($s['tenth_board_name'])
+                                ? sanitize($s['tenth_board_name'])
+                                : '-'; ?>
+                        </strong>
+                    </div>
+
+                    <div class="education-detail">
+                        <span>Registration No.</span>
+                        <strong>
+                            <?php echo !empty($s['tenth_registration_no'])
+                                ? sanitize($s['tenth_registration_no'])
+                                : '-'; ?>
+                        </strong>
+                    </div>
+
+                    <div class="education-detail">
+                        <span>Roll No.</span>
+                        <strong>
+                            <?php echo !empty($s['tenth_roll_no'])
+                                ? sanitize($s['tenth_roll_no'])
+                                : '-'; ?>
+                        </strong>
+                    </div>
+
+                    <div class="education-detail">
+                        <span>Passing Year</span>
+                        <strong>
+                            <?php echo !empty($s['tenth_passing_year'])
+                                ? $s['tenth_passing_year']
+                                : '-'; ?>
+                        </strong>
+                    </div>
+
+                    <div class="education-detail">
+                        <span>Marks</span>
+                        <strong>
+                            <?php
+                            if (
+                                $s['tenth_obtained_marks'] !== null &&
+                                $s['tenth_total_marks'] !== null
+                            ) {
+                                echo $s['tenth_obtained_marks'] . ' / ' . $s['tenth_total_marks'];
+                            } else {
+                                echo '-';
+                            }
+                            ?>
+                        </strong>
+                    </div>
+
                 </div>
-                <?php endif; ?>
             </div>
+
+
+            <!-- ================= 12TH ================= -->
+            <div class="education-card mb-3">
+
+                <div class="education-title">
+                    <div>
+                        <span class="education-icon">
+                            <i class="fas fa-school"></i>
+                        </span>
+
+                        <span>12th Standard</span>
+                    </div>
+
+                    <?php if (!empty($s['twelfth_percentage'])): ?>
+                        <span class="percentage-badge">
+                            <?php echo $s['twelfth_percentage']; ?>%
+                        </span>
+                    <?php endif; ?>
+                </div>
+
+                <div class="education-details">
+
+                    <div class="education-detail">
+                        <span>Institute / School</span>
+                        <strong>
+                            <?php echo !empty($s['twelfth_institute_name'])
+                                ? sanitize($s['twelfth_institute_name'])
+                                : '-'; ?>
+                        </strong>
+                    </div>
+
+                    <div class="education-detail">
+                        <span>Board</span>
+                        <strong>
+                            <?php echo !empty($s['twelfth_board_name'])
+                                ? sanitize($s['twelfth_board_name'])
+                                : '-'; ?>
+                        </strong>
+                    </div>
+
+                    <div class="education-detail">
+                        <span>Registration No.</span>
+                        <strong>
+                            <?php echo !empty($s['twelfth_registration_no'])
+                                ? sanitize($s['twelfth_registration_no'])
+                                : '-'; ?>
+                        </strong>
+                    </div>
+
+                    <div class="education-detail">
+                        <span>Roll No.</span>
+                        <strong>
+                            <?php echo !empty($s['twelfth_roll_no'])
+                                ? sanitize($s['twelfth_roll_no'])
+                                : '-'; ?>
+                        </strong>
+                    </div>
+
+                    <div class="education-detail">
+                        <span>Passing Year</span>
+                        <strong>
+                            <?php echo !empty($s['twelfth_passing_year'])
+                                ? $s['twelfth_passing_year']
+                                : '-'; ?>
+                        </strong>
+                    </div>
+
+                    <div class="education-detail">
+                        <span>Marks</span>
+                        <strong>
+                            <?php
+                            if (
+                                $s['twelfth_obtained_marks'] !== null &&
+                                $s['twelfth_total_marks'] !== null
+                            ) {
+                                echo $s['twelfth_obtained_marks'] . ' / ' . $s['twelfth_total_marks'];
+                            } else {
+                                echo '-';
+                            }
+                            ?>
+                        </strong>
+                    </div>
+
+                </div>
+            </div>
+
+
+            <!-- ================= UG ================= -->
+            <?php if (!empty($s['ug_university_name']) || !empty($s['ug_institute_name'])): ?>
+
+                <div class="education-card mb-3">
+
+                    <div class="education-title">
+                        <div>
+                            <span class="education-icon">
+                                <i class="fas fa-university"></i>
+                            </span>
+
+                            <span>Undergraduate (UG)</span>
+                        </div>
+
+                        <?php if (!empty($s['ug_percentage'])): ?>
+                            <span class="percentage-badge">
+                                <?php echo $s['ug_percentage']; ?>%
+                            </span>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="education-details">
+
+                        <div class="education-detail">
+                            <span>Institute / College</span>
+                            <strong>
+                                <?php echo !empty($s['ug_institute_name'])
+                                    ? sanitize($s['ug_institute_name'])
+                                    : '-'; ?>
+                            </strong>
+                        </div>
+
+                        <div class="education-detail">
+                            <span>University</span>
+                            <strong>
+                                <?php echo !empty($s['ug_university_name'])
+                                    ? sanitize($s['ug_university_name'])
+                                    : '-'; ?>
+                            </strong>
+                        </div>
+
+                        <div class="education-detail">
+                            <span>Registration No.</span>
+                            <strong>
+                                <?php echo !empty($s['ug_registration_no'])
+                                    ? sanitize($s['ug_registration_no'])
+                                    : '-'; ?>
+                            </strong>
+                        </div>
+
+                        <div class="education-detail">
+                            <span>Roll No.</span>
+                            <strong>
+                                <?php echo !empty($s['ug_roll_no'])
+                                    ? sanitize($s['ug_roll_no'])
+                                    : '-'; ?>
+                            </strong>
+                        </div>
+
+                        <div class="education-detail">
+                            <span>Passing Year</span>
+                            <strong>
+                                <?php echo !empty($s['ug_passing_year'])
+                                    ? $s['ug_passing_year']
+                                    : '-'; ?>
+                            </strong>
+                        </div>
+
+                        <div class="education-detail">
+                            <span>Marks</span>
+                            <strong>
+                                <?php
+                                if (
+                                    $s['ug_obtained_marks'] !== null &&
+                                    $s['ug_total_marks'] !== null
+                                ) {
+                                    echo $s['ug_obtained_marks'] . ' / ' . $s['ug_total_marks'];
+                                } else {
+                                    echo '-';
+                                }
+                                ?>
+                            </strong>
+                        </div>
+
+                    </div>
+                </div>
+
+            <?php endif; ?>
+
+
+            <!-- ================= PG ================= -->
+            <?php if (!empty($s['pg_university_name']) || !empty($s['pg_institute_name'])): ?>
+
+                <div class="education-card">
+
+                    <div class="education-title">
+                        <div>
+                            <span class="education-icon">
+                                <i class="fas fa-university"></i>
+                            </span>
+
+                            <span>Postgraduate (PG)</span>
+                        </div>
+
+                        <?php if (!empty($s['pg_percentage'])): ?>
+                            <span class="percentage-badge">
+                                <?php echo $s['pg_percentage']; ?>%
+                            </span>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="education-details">
+
+                        <div class="education-detail">
+                            <span>Institute / College</span>
+                            <strong>
+                                <?php echo !empty($s['pg_institute_name'])
+                                    ? sanitize($s['pg_institute_name'])
+                                    : '-'; ?>
+                            </strong>
+                        </div>
+
+                        <div class="education-detail">
+                            <span>University</span>
+                            <strong>
+                                <?php echo !empty($s['pg_university_name'])
+                                    ? sanitize($s['pg_university_name'])
+                                    : '-'; ?>
+                            </strong>
+                        </div>
+
+                        <div class="education-detail">
+                            <span>Registration No.</span>
+                            <strong>
+                                <?php echo !empty($s['pg_registration_no'])
+                                    ? sanitize($s['pg_registration_no'])
+                                    : '-'; ?>
+                            </strong>
+                        </div>
+
+                        <div class="education-detail">
+                            <span>Roll No.</span>
+                            <strong>
+                                <?php echo !empty($s['pg_roll_no'])
+                                    ? sanitize($s['pg_roll_no'])
+                                    : '-'; ?>
+                            </strong>
+                        </div>
+
+                        <div class="education-detail">
+                            <span>Passing Year</span>
+                            <strong>
+                                <?php echo !empty($s['pg_passing_year'])
+                                    ? $s['pg_passing_year']
+                                    : '-'; ?>
+                            </strong>
+                        </div>
+
+                        <div class="education-detail">
+                            <span>Marks</span>
+                            <strong>
+                                <?php
+                                if (
+                                    $s['pg_obtained_marks'] !== null &&
+                                    $s['pg_total_marks'] !== null
+                                ) {
+                                    echo $s['pg_obtained_marks'] . ' / ' . $s['pg_total_marks'];
+                                } else {
+                                    echo '-';
+                                }
+                                ?>
+                            </strong>
+                        </div>
+
+                    </div>
+                </div>
+
+            <?php endif; ?>
+
         </div>
     </div>
 </div>
+
+<style>
+    .education-card {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 16px;
+    transition: all 0.25s ease;
+}
+
+.education-card:hover {
+    background: #fff;
+    border-color: #d9dee3;
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.06);
+}
+
+.education-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 14px;
+    font-weight: 600;
+    color: #212529;
+}
+
+.education-title > div {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.education-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(13, 110, 253, 0.1);
+    color: #0d6efd;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.percentage-badge {
+    background: #e8f7ee;
+    color: #198754;
+    border-radius: 20px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.education-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px 16px;
+}
+
+.education-detail {
+    min-width: 0;
+}
+
+.education-detail span {
+    display: block;
+    color: #8a94a6;
+    font-size: 11px;
+    margin-bottom: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.education-detail strong {
+    display: block;
+    color: #343a40;
+    font-size: 13px;
+    font-weight: 600;
+    word-break: break-word;
+}
+
+@media (max-width: 576px) {
+    .education-details {
+        grid-template-columns: 1fr;
+    }
+
+    .education-card {
+        padding: 14px;
+    }
+}
+</style>
 
 <!-- Photo & Signature -->
 <div class="card mt-4">

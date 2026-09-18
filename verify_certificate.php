@@ -46,12 +46,12 @@ if (!$cert_id && !$enrollment) {
 <body>
 
 <div class="box">
-    <h2>Verify Certificate</h2>
+    <h2>Download Certificate</h2>
     <form method="GET">
         <input type="text" name="enrollment" placeholder="Enter Enrollment No"><br>
         <b>OR</b><br>
         <input type="text" name="cert_id" placeholder="Enter Certificate No"><br>
-        <button type="submit">Search</button>
+        <button type="submit">Download Certificate</button>
     </form>
 </div>
 
