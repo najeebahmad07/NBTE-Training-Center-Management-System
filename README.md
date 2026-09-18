@@ -516,17 +516,11 @@ NBTE-Training-Center-Management-System/
 
 # 📸 Screenshots
 
-Create a folder named:
-
-```text
-screenshots/
-```
-
-Add your project screenshots to this folder.
 
 ## 🏠 Dashboard
 
-![Dashboard](screenshots/dashboard.png)
+![Dashboard](<img width="1917" height="970" alt="dashboard" src="https://github.com/user-attachments/assets/5599ea36-2f19-438b-8997-31feb1072c9a" />
+)
 
 ---
 
