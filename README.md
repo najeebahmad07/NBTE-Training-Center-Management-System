@@ -519,8 +519,8 @@ NBTE-Training-Center-Management-System/
 
 ## 🏠 Dashboard
 
-![Dashboard](<img width="1917" height="970" alt="dashboard" src="https://github.com/user-attachments/assets/5599ea36-2f19-438b-8997-31feb1072c9a" />
-)
+![Dashboard]<img width="1917" height="970" alt="dashboard" src="https://github.com/user-attachments/assets/5599ea36-2f19-438b-8997-31feb1072c9a" />
+
 
 ---
 
