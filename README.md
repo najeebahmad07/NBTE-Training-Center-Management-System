@@ -519,86 +519,102 @@ NBTE-Training-Center-Management-System/
 
 ## 🏠 Dashboard
 
-![Dashboard]<img width="1917" height="970" alt="dashboard" src="https://github.com/user-attachments/assets/5599ea36-2f19-438b-8997-31feb1072c9a" />
+<img width="1917" height="970" alt="dashboard" src="https://github.com/user-attachments/assets/5599ea36-2f19-438b-8997-31feb1072c9a" />
 
 
 ---
 
 ## 👤 Admin Management
 
-![Admin Management](screenshots/admin-management.png)
+<img width="1912" height="972" alt="admin management" src="https://github.com/user-attachments/assets/7d2af8a0-75e0-47fd-b872-fdadd029889d" />
+
 
 ---
 
 ## 🏫 Training Center Management
 
-![Training Center Management](screenshots/training-center-management.png)
+<img width="1917" height="970" alt="center" src="https://github.com/user-attachments/assets/d9ade7b4-e969-4dc7-9b1a-dcd8ba1bed2a" />
+
 
 ---
 
 ## 👨‍🎓 Student Management
 
-![Student Management](screenshots/student-management.png)
+<img width="1917" height="965" alt="student" src="https://github.com/user-attachments/assets/86aad6f6-661a-4a86-87d7-ac49abc424d9" />
+
 
 ---
 
 ## 📝 Student Admission
 
-![Student Admission](screenshots/student-admission.png)
+<img width="1915" height="967" alt="addstudent" src="https://github.com/user-attachments/assets/6015ef16-11af-4f00-b663-5c84d4048bab" />
+
 
 ---
 
 ## 📚 Programs
 
-![Programs](screenshots/programs.png)
+<img width="1917" height="967" alt="programs" src="https://github.com/user-attachments/assets/292659d5-079c-4650-a5e0-0603509f77d8" />
+
 
 ---
 
 ## 📖 Courses
 
-![Courses](screenshots/courses.png)
+<img width="1917" height="967" alt="course" src="https://github.com/user-attachments/assets/9f24f653-31cf-4043-a3b4-66b40f230d44" />
+
 
 ---
 
 ## 📝 Marks Entry
 
-![Marks Entry](screenshots/marks-entry.png)
+<img width="1917" height="970" alt="marksentry" src="https://github.com/user-attachments/assets/b9165330-0a1f-40c1-bfe4-5ff34f92aae9" />
+
 
 ---
 
 ## 📊 Result Search
 
-![Result Search](screenshots/result-search.png)
+<img width="1917" height="971" alt="result" src="https://github.com/user-attachments/assets/f7a33c9f-85b4-4538-8a25-e10b8974bb2b" />
+
+
 
 ---
 
 ## 📄 Student Result
 
-![Student Result](screenshots/result.png)
+<img width="1912" height="970" alt="resultsearch" src="https://github.com/user-attachments/assets/9b9a33c3-1922-4af8-9f18-8d732a8f03af" />
+
+
 
 ---
 
 ## 🏆 Marksheet
 
-![Marksheet](screenshots/marksheet.png)
+<img width="1917" height="975" alt="marksheet" src="https://github.com/user-attachments/assets/a1ab7d56-fb0e-4bb5-a574-3f1a2e4c324c" />
+
+
 
 ---
 
 ## 🪪 Student ID Card
 
-![Student ID Card](screenshots/id-card.png)
+<img width="546" height="817" alt="id card" src="https://github.com/user-attachments/assets/cb4a564c-29c1-4c21-9c7e-f78145c3caa6" />
+
 
 ---
 
 ## 🏅 Authorized Certificate
 
-![Authorized Certificate](screenshots/authorized-certificate.png)
+<img width="1076" height="766" alt="Uthorized" src="https://github.com/user-attachments/assets/4711f06a-d529-481b-a461-228d6c45d2c0" />
+
 
 ---
 
 ## 🔎 Student Verification
 
-![Student Verification](screenshots/student-verification.png)
+<img width="1906" height="907" alt="verification" src="https://github.com/user-attachments/assets/adeed6c5-d0ea-4260-ba0f-f25a0d06756e" />
+
 
 ---
 
