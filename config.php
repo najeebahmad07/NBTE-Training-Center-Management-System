@@ -30,8 +30,8 @@ define('DB_PASS', '');
 define('DB_CHARSET', 'utf8mb4');
 
 // Razorpay Configuration
-define('RAZORPAY_KEY_ID', 'rzp_test_TQWuPysRxCUw5Q');
-define('RAZORPAY_KEY_SECRET', 'a2hHQaCGmM3he2WhnuYnlZDn');
+define('RAZORPAY_KEY_ID', 'rzp_test_T****************');
+define('RAZORPAY_KEY_SECRET', '**********************');
 
 // Wallet Configuration
 // Wallet Configuration
